@@ -135,36 +135,19 @@ ${portfolioContext}`
 
         messages.push({ role: 'user', content: prompt });
 
-        // Stream response from Groq
+        // Get response from Groq (compound-beta doesn't support streaming)
         const chatCompletion = await groq.chat.completions.create({
             messages,
-            model: 'compound',
+            model: 'compound-beta',
             temperature: 0.7,
             max_completion_tokens: 1024,
-            stream: true,
         });
 
-        // Create a ReadableStream to forward chunks
-        const stream = new ReadableStream({
-            async start(controller) {
-                try {
-                    for await (const chunk of chatCompletion) {
-                        const content = chunk.choices[0]?.delta?.content || '';
-                        if (content) {
-                            controller.enqueue(new TextEncoder().encode(content));
-                        }
-                    }
-                    controller.close();
-                } catch (err) {
-                    controller.error(err);
-                }
-            }
-        });
+        const content = chatCompletion.choices[0]?.message?.content || '';
 
-        return new Response(stream, {
+        return new Response(content, {
             headers: {
                 'Content-Type': 'text/plain; charset=utf-8',
-                'Transfer-Encoding': 'chunked',
             },
         });
 
