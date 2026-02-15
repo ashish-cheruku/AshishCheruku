@@ -367,6 +367,23 @@ export default function Terminal() {
                     await new Promise(resolve => setTimeout(resolve, 1));
                 }
 
+                // Check if AI wants to show creator art
+                if (fullResponseText.includes('[SHOW_CREATOR_ART]')) {
+                    // Remove the streamed text response
+                    responseEntry.remove();
+                    // Show creator art properly with the ascii-art class
+                    if (portfolioData.creatorArt) {
+                        // Strip the token and show any surrounding text the AI may have added
+                        const otherText = fullResponseText.replace('[SHOW_CREATOR_ART]', '').trim();
+                        if (otherText) {
+                            appendOutput(parseMarkdown(otherText));
+                        }
+                        appendOutput(`<div class="ascii-art">${portfolioData.creatorArt}</div>`);
+                    } else {
+                        appendOutput('Creator art not available.');
+                    }
+                }
+
                 conversationHistoryRef.current.push({ role: 'assistant', text: fullResponseText });
 
             } catch (error) {

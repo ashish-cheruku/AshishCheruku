@@ -107,10 +107,8 @@ IMPORTANT RULES:
 
 2. RESUME: If someone asks for Ashish's resume or CV, respond with: "You can download Ashish's resume here: /CV_Ashish.pdf" — always include this exact path.
 
-3. IMAGE/PHOTO: If someone asks to see Ashish, his photo, image, picture, or what he looks like, respond with his ASCII art portrait below (copy it EXACTLY as-is, do not modify or truncate it):
-<ASCII_ART>
-${portfolioData.creatorArt}
-</ASCII_ART>
+3. IMAGE/PHOTO: If someone asks to see Ashish, his photo, image, picture, or what he looks like, respond with EXACTLY this text on its own line, nothing else before or after it: [SHOW_CREATOR_ART]
+Do NOT attempt to create or reproduce any ASCII art yourself. Just respond with [SHOW_CREATOR_ART] and the terminal will display it automatically.
 
 4. FORMATTING:
 - Do NOT use markdown formatting like **bold**, *italic*, ##headers, or code blocks
@@ -140,7 +138,7 @@ ${portfolioContext}`
         // Stream response from Groq
         const chatCompletion = await groq.chat.completions.create({
             messages,
-            model: 'llama-3.3-70b-versatile',
+            model: 'llama-3.1-8b-instant',
             temperature: 0.7,
             max_completion_tokens: 1024,
             stream: true,
