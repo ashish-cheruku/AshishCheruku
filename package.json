@@ -1,0 +1,18 @@
+{
+  "name": "ashish-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Interactive terminal-style portfolio for Ashish Kumar Cheruku",
+  "author": "Ashish Kumar Cheruku",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "groq-sdk": "^0.8.0",
+    "next": "^14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  }
+}

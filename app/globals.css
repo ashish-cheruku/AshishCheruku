@@ -1,0 +1,722 @@
+/* ============================================= */
+/*  GLOBALS — Ashish Kumar Cheruku Portfolio      */
+/* ============================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Fira Code', 'Courier Prime', monospace;
+    background-color: #d2d2d2;
+    color: #4a3f36;
+    text-shadow: 0 0 2px rgba(74, 63, 54, 0.3);
+    transition: background-color 0.3s, color 0.3s;
+    padding: 1.5rem;
+}
+
+/* ----------- Network Canvas ----------- */
+#network-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.15;
+}
+
+/* ----------- Terminal Container ----------- */
+.terminal-container {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    height: 95vh;
+}
+
+#terminal,
+#gui-mode {
+    position: relative;
+    background-color: #d2d2d2;
+    transition: background-color 0.3s;
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+#terminal {
+    animation: flicker 0.15s infinite;
+    scrollbar-width: none;
+}
+
+#terminal::-webkit-scrollbar {
+    display: none;
+}
+
+/* ----------- Scanlines ----------- */
+#scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 4;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 2px, rgba(74, 63, 54, 0.1) 3px, rgba(74, 63, 54, 0.1) 4px);
+}
+
+@keyframes flicker {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.98;
+    }
+}
+
+/* ----------- Input ----------- */
+#terminal-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #4a3f36;
+    font-family: 'Fira Code', 'Courier Prime', monospace;
+    caret-color: transparent;
+    word-break: break-all;
+    -webkit-user-modify: read-write-plaintext-only;
+    flex-grow: 1;
+    position: relative;
+    display: inline;
+    min-width: 1ch;
+}
+
+#terminal-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+#terminal-input::after {
+    content: '';
+    display: inline-block;
+    width: 0.15ch;
+    height: 1.1em;
+    background-color: currentColor;
+    vertical-align: middle;
+    margin-top: -0.2em;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% {
+        opacity: 0;
+    }
+}
+
+.prompt-live {
+    color: #665e52;
+    white-space: nowrap;
+}
+
+.prompt-line-wrapper>.prompt-live {
+    padding-right: 0.5ch;
+}
+
+.prompt-line-wrapper>#terminal-input {
+    outline: none;
+}
+
+/* ----------- Commands & Links ----------- */
+.command {
+    color: #d9742b;
+}
+
+.link {
+    color: #4a3f36;
+    text-decoration: underline;
+}
+
+.link:hover {
+    color: #28201a;
+}
+
+/* ----------- ASCII Art ----------- */
+.ascii-art {
+    white-space: pre;
+    font-family: 'Courier Prime', monospace;
+    line-height: 1.0;
+    font-size: 4px;
+    text-align: center;
+    transform: scaleY(1.1);
+    margin: 2rem 0;
+    margin-top: 0;
+}
+
+.ascii-art-bg {
+    display: inline-block;
+    color: #28201a;
+    background-color: #d2d2d2;
+}
+
+/* ----------- Contact Icons ----------- */
+#contact-icons-wrapper {
+    position: relative;
+    z-index: 10;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+#contact-icons-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#contact-icons {
+    display: flex;
+    gap: 0.75rem;
+    pointer-events: auto;
+    align-items: center;
+    padding: 1rem;
+}
+
+#contact-icons a,
+#contact-icons .icon-button {
+    color: #4a3f36;
+    transition: opacity 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+#contact-icons a:hover,
+#contact-icons .icon-button:hover {
+    opacity: 0.6;
+}
+
+#contact-icons svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+/* ----------- Output ----------- */
+.output-entry {
+    margin-bottom: 0.75rem;
+}
+
+/* ----------- Skills ----------- */
+.skills-category-title {
+    color: #d9742b;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    font-size: 1.15em;
+}
+
+.skills-subcategory-title {
+    font-weight: bold;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.skills-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.skill-box {
+    background-color: rgba(74, 63, 54, 0.08);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    border: 1px solid rgba(74, 63, 54, 0.15);
+}
+
+/* ----------- Clock & Footer ----------- */
+#clock {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+#weather-display {
+    pointer-events: auto;
+}
+
+#footer {
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    padding-top: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+/* ----------- GUI Mode ----------- */
+#gui-mode {
+    display: none;
+    background-color: #d2d2d2;
+    transition: background-color 0.3s;
+}
+
+#gui-mode .gui-item {
+    margin-bottom: 1.5rem;
+}
+
+#gui-mode .gui-item-title {
+    font-weight: bold;
+}
+
+#gui-mode ul {
+    list-style-type: disc;
+    padding-left: 2rem;
+}
+
+#gui-footer {
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.6;
+    padding-top: 1rem;
+    margin-top: 2rem;
+    border-top: 1px solid rgba(74, 63, 54, 0.2);
+}
+
+.gui-tabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(74, 63, 54, 0.2);
+    margin-bottom: 2rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: inherit;
+    opacity: 0.6;
+    transition: opacity 0.2s, border-bottom-color 0.2s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    font-family: 'Fira Code', monospace;
+    font-size: inherit;
+}
+
+.tab-button:hover {
+    opacity: 1;
+}
+
+.tab-button.active {
+    opacity: 1;
+    font-weight: bold;
+    color: #d9742b;
+    border-bottom-color: #d9742b;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ----------- Scrollbar ----------- */
+#terminal,
+#gui-mode {
+    scrollbar-width: thin;
+    scrollbar-color: #4a3f36 #d2d2d2;
+}
+
+#terminal::-webkit-scrollbar,
+#gui-mode::-webkit-scrollbar {
+    width: 8px;
+}
+
+#terminal::-webkit-scrollbar-track,
+#gui-mode::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#terminal::-webkit-scrollbar-thumb,
+#gui-mode::-webkit-scrollbar-thumb {
+    background-color: #4a3f36;
+    border-radius: 4px;
+    border: 2px solid #d2d2d2;
+}
+
+/* ============================================= */
+/*  DARK MODE (black bg, green text, orange cmds) */
+/* ============================================= */
+body.dark {
+    background-color: #000000;
+    color: #00ff41;
+    text-shadow: 0 0 4px rgba(0, 255, 65, 0.3);
+}
+
+body.dark #terminal,
+body.dark #gui-mode {
+    background-color: #000000;
+}
+
+body.dark #scanlines {
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0, rgba(0, 0, 0, 0) 2px, rgba(0, 255, 65, 0.08) 3px, rgba(0, 255, 65, 0.08) 4px);
+}
+
+body.dark #terminal-input {
+    caret-color: transparent;
+    color: #00ff41;
+}
+
+body.dark .link,
+body.dark #contact-icons a,
+body.dark #contact-icons .icon-button {
+    color: #00ff41;
+    caret-color: #00ff41;
+}
+
+body.dark .link:hover {
+    color: #66ff88;
+}
+
+body.dark .prompt-live {
+    color: #00cc33;
+}
+
+body.dark .command,
+body.dark .skills-category-title {
+    color: #fe8019;
+}
+
+body.dark .skill-box {
+    background-color: rgba(0, 255, 65, 0.08);
+    border-color: rgba(0, 255, 65, 0.2);
+    color: #00ff41;
+}
+
+body.dark #gui-footer {
+    border-top-color: rgba(0, 255, 65, 0.2);
+}
+
+body.dark .gui-tabs-nav {
+    border-bottom-color: rgba(0, 255, 65, 0.2);
+}
+
+body.dark .tab-button.active {
+    color: #fe8019;
+    border-bottom-color: #fe8019;
+}
+
+body.dark #terminal,
+body.dark #gui-mode {
+    scrollbar-color: #fe8019 #000000;
+}
+
+body.dark #terminal::-webkit-scrollbar-thumb,
+body.dark #gui-mode::-webkit-scrollbar-thumb {
+    background-color: #fe8019;
+    border-color: #000000;
+}
+
+/* Moon/Sun toggle */
+#moon-icon {
+    display: none;
+}
+
+body.dark #sun-icon {
+    display: none;
+}
+
+body.dark #moon-icon {
+    display: block;
+}
+
+/* ============================================= */
+/*  BOOT OVERLAY — Dramatic Hacking Effect        */
+/* ============================================= */
+#boot-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    transition: opacity 0.8s ease-out;
+}
+
+#boot-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Matrix rain background */
+.matrix-rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    opacity: 0.15;
+}
+
+.matrix-column {
+    position: absolute;
+    top: -100%;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    color: #00ff41;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    line-height: 1.2;
+    animation: matrix-fall linear infinite;
+    text-shadow: 0 0 8px #00ff41;
+    white-space: nowrap;
+}
+
+@keyframes matrix-fall {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(calc(100vh + 100%));
+    }
+}
+
+/* Boot log messages */
+.boot-log {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 700px;
+    font-family: 'Fira Code', monospace;
+    font-size: 14px;
+    color: #00ff41;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+}
+
+.boot-line {
+    opacity: 0;
+    margin-bottom: 2px;
+    white-space: pre;
+    overflow: hidden;
+}
+
+.boot-line.visible {
+    opacity: 1;
+}
+
+.boot-line.typing {
+    border-right: 2px solid #00ff41;
+    animation: blink-cursor 0.6s step-end infinite;
+}
+
+@keyframes blink-cursor {
+    50% {
+        border-color: transparent;
+    }
+}
+
+.boot-line .ok {
+    color: #00ff41;
+    font-weight: bold;
+}
+
+.boot-line .warn {
+    color: #ffa500;
+}
+
+.boot-line .fail {
+    color: #ff3333;
+}
+
+.boot-line .highlight {
+    color: #fe8019;
+    font-weight: bold;
+}
+
+.boot-line .cyan {
+    color: #00e5ff;
+}
+
+/* Progress bar */
+.boot-progress {
+    position: relative;
+    z-index: 2;
+    width: 90%;
+    max-width: 700px;
+    margin-top: 16px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.boot-progress.visible {
+    opacity: 1;
+}
+
+.boot-progress-bar {
+    height: 3px;
+    background: rgba(0, 255, 65, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.boot-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00ff41, #00e5ff, #00ff41);
+    border-radius: 2px;
+    transition: width 0.15s linear;
+    box-shadow: 0 0 8px #00ff41, 0 0 16px rgba(0, 255, 65, 0.3);
+}
+
+.boot-progress-text {
+    font-family: 'Fira Code', monospace;
+    font-size: 11px;
+    color: #00ff41;
+    text-shadow: 0 0 4px rgba(0, 255, 65, 0.4);
+    margin-top: 6px;
+    text-align: right;
+    opacity: 0.7;
+}
+
+/* ACCESS GRANTED flash */
+.access-granted {
+    position: absolute;
+    z-index: 3;
+    font-family: 'Fira Code', monospace;
+    font-size: clamp(24px, 5vw, 48px);
+    font-weight: bold;
+    color: #00ff41;
+    text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41, 0 0 80px rgba(0, 255, 65, 0.5);
+    letter-spacing: 0.3em;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.access-granted.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Glitch overlay */
+.boot-glitch {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.boot-glitch.active {
+    animation: glitch-flash 0.15s steps(2) 3;
+}
+
+@keyframes glitch-flash {
+    0% {
+        opacity: 0;
+        background: transparent;
+    }
+
+    25% {
+        opacity: 1;
+        background: rgba(0, 255, 65, 0.03);
+        transform: translateX(-2px);
+    }
+
+    50% {
+        opacity: 0;
+        background: transparent;
+        transform: translateX(2px);
+    }
+
+    75% {
+        opacity: 1;
+        background: rgba(255, 0, 0, 0.02);
+        transform: translateY(-1px);
+    }
+
+    100% {
+        opacity: 0;
+        background: transparent;
+        transform: translate(0);
+    }
+}
+
+/* Scanline effect during boot (stronger) */
+.boot-scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg,
+            rgba(0, 0, 0, 0) 0,
+            rgba(0, 0, 0, 0) 2px,
+            rgba(0, 255, 65, 0.06) 3px,
+            rgba(0, 255, 65, 0.06) 4px);
+}
+
+/* ============================================= */
+/*  RESPONSIVE                                    */
+/* ============================================= */
+@media (max-width: 768px) {
+    body {
+        padding: 1rem;
+    }
+
+    .terminal-container {
+        height: 90vh;
+    }
+
+    #contact-icons-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    #contact-icons {
+        justify-content: center;
+        width: 100%;
+        padding: 0.5rem 0;
+    }
+
+    #status-bar {
+        margin-left: 0;
+        justify-content: center;
+        width: 100%;
+    }
+
+    #terminal {
+        padding: 0.75rem;
+    }
+
+    .output-entry {
+        margin-bottom: 0.5rem;
+    }
+
+    .prompt-live {
+        white-space: normal;
+        word-break: break-all;
+    }
+
+    #terminal-input {
+        min-width: 0;
+    }
+}
