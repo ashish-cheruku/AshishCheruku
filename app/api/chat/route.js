@@ -138,7 +138,7 @@ ${portfolioContext}`
         // Stream response from Groq
         const chatCompletion = await groq.chat.completions.create({
             messages,
-            model: 'llama-3.1-8b-instant',
+            model: 'compound',
             temperature: 0.7,
             max_completion_tokens: 1024,
             stream: true,
