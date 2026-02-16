@@ -456,8 +456,13 @@ export default function Terminal() {
         // Global key handler: focus input on any keydown
         function handleGlobalKeyDown(e) {
             if (e.ctrlKey || e.metaKey || e.altKey || document.activeElement === inputEl) return;
-            inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Only intercept printable character keys (skip arrows, function keys, etc.)
+            if (e.key.length !== 1) return;
+            e.preventDefault();
             inputEl.focus();
+            // Manually insert the character that would otherwise be lost
+            document.execCommand('insertText', false, e.key);
+            inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         window.addEventListener('keydown', handleGlobalKeyDown);
 
