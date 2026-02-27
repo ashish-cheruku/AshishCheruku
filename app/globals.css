@@ -30,14 +30,14 @@ body.dark {
     --bg: #030708;
     --surface: rgba(7, 18, 21, 0.72);
     --surface-solid: #071215;
-    --text: #9afdb9;
-    --muted: #5bb38f;
+    --text: #00ff41;
+    --muted: #00cc33;
     --accent: #ff8f2b;
-    --accent-2: #1fc8d5;
-    --border: rgba(154, 253, 185, 0.24);
-    --glow: 0 0 22px rgba(31, 200, 213, 0.16);
-    --scanline: rgba(31, 200, 213, 0.05);
-    --node-rgb: 18, 255, 170;
+    --accent-2: #00ff41;
+    --border: rgba(0, 255, 65, 0.24);
+    --glow: 0 0 22px rgba(0, 255, 65, 0.16);
+    --scanline: rgba(0, 255, 65, 0.05);
+    --node-rgb: 0, 255, 65;
 }
 
 * {
@@ -66,7 +66,7 @@ body {
 body.dark {
     background:
         radial-gradient(circle at 10% -12%, rgba(255, 143, 43, 0.15), transparent 52%),
-        radial-gradient(circle at 88% 118%, rgba(31, 200, 213, 0.16), transparent 48%),
+        radial-gradient(circle at 88% 118%, rgba(0, 255, 65, 0.16), transparent 48%),
         linear-gradient(150deg, #04090b 0%, #020607 44%, #071114 100%);
 }
 
@@ -229,7 +229,7 @@ body::after {
 }
 
 .control-pill:focus-visible {
-    outline: 2px solid rgba(31, 200, 213, 0.8);
+    outline: 2px solid rgba(0, 255, 65, 0.8);
     outline-offset: 2px;
 }
 
@@ -258,10 +258,10 @@ body::after {
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--accent-2);
-    border: 1px solid rgba(31, 200, 213, 0.35);
+    border: 1px solid rgba(0, 255, 65, 0.35);
     border-radius: 999px;
     padding: 4px 10px;
-    background: rgba(31, 200, 213, 0.08);
+    background: rgba(0, 255, 65, 0.08);
 }
 
 #clock {
@@ -371,7 +371,7 @@ body::after {
 .link {
     color: var(--accent-2);
     text-decoration: none;
-    border-bottom: 1px solid rgba(31, 200, 213, 0.4);
+    border-bottom: 1px solid rgba(0, 255, 65, 0.4);
     transition: color 0.2s ease, border-color 0.2s ease;
 }
 
@@ -417,7 +417,7 @@ body::after {
     padding: var(--space-3);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    background: linear-gradient(125deg, rgba(255, 143, 43, 0.14), rgba(31, 200, 213, 0.09));
+    background: linear-gradient(125deg, rgba(255, 143, 43, 0.14), rgba(0, 255, 65, 0.09));
 }
 
 .gui-hero-mark {
@@ -513,7 +513,7 @@ body::after {
 
 .tab-button:hover {
     color: var(--text);
-    border-color: rgba(31, 200, 213, 0.45);
+    border-color: rgba(0, 255, 65, 0.45);
 }
 
 .tab-button.active {
@@ -582,8 +582,8 @@ body::after {
 }
 
 .project-featured {
-    border-color: rgba(31, 200, 213, 0.5);
-    box-shadow: 0 0 0 1px rgba(31, 200, 213, 0.2) inset;
+    border-color: rgba(0, 255, 65, 0.5);
+    box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.2) inset;
 }
 
 .gui-item-title {
@@ -735,12 +735,12 @@ body.dark #moon-icon {
     top: -100%;
     font-family: var(--font-mono);
     font-size: 14px;
-    color: #2fffc4;
+    color: #00ff41;
     writing-mode: vertical-rl;
     text-orientation: upright;
     line-height: 1.2;
     animation: matrix-fall linear infinite;
-    text-shadow: 0 0 8px rgba(47, 255, 196, 0.7);
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.7);
     white-space: nowrap;
 }
 
@@ -762,8 +762,8 @@ body.dark #moon-icon {
     overflow: hidden;
     font-family: var(--font-mono);
     font-size: 13px;
-    color: #7efec8;
-    text-shadow: 0 0 6px rgba(126, 254, 200, 0.3);
+    color: #00ff41;
+    text-shadow: 0 0 6px rgba(0, 255, 65, 0.35);
 }
 
 .boot-line {
@@ -778,7 +778,7 @@ body.dark #moon-icon {
 }
 
 .boot-line.typing {
-    border-right: 2px solid #7efec8;
+    border-right: 2px solid #00ff41;
     animation: boot-caret 0.55s step-end infinite;
 }
 
@@ -789,7 +789,7 @@ body.dark #moon-icon {
 }
 
 .boot-line .ok {
-    color: #39f3b6;
+    color: #00ff41;
     font-weight: 700;
 }
 
@@ -823,14 +823,14 @@ body.dark #moon-icon {
     height: 3px;
     border-radius: 999px;
     overflow: hidden;
-    background: rgba(126, 254, 200, 0.14);
+    background: rgba(0, 255, 65, 0.14);
 }
 
 .boot-progress-fill {
     height: 100%;
     width: 0;
     border-radius: 999px;
-    background: linear-gradient(90deg, #2fffc4, #37e5f2, #ff8f2b);
+    background: linear-gradient(90deg, #00ff41, #00e5ff, #00ff41);
     transition: width 0.15s linear;
 }
 
@@ -838,7 +838,7 @@ body.dark #moon-icon {
     margin-top: 6px;
     text-align: right;
     font-family: var(--font-mono);
-    color: #7efec8;
+    color: #00ff41;
     font-size: 10px;
     opacity: 0.75;
 }
@@ -850,8 +850,8 @@ body.dark #moon-icon {
     font-size: clamp(22px, 4.6vw, 44px);
     font-weight: 700;
     letter-spacing: 0.24em;
-    color: #2fffc4;
-    text-shadow: 0 0 26px rgba(47, 255, 196, 0.45);
+    color: #00ff41;
+    text-shadow: 0 0 26px rgba(0, 255, 65, 0.45);
     opacity: 0;
     transform: scale(0.85);
     transition: opacity 0.25s, transform 0.25s;
@@ -882,7 +882,7 @@ body.dark #moon-icon {
     40% {
         opacity: 1;
         transform: translateX(-2px);
-        background: rgba(47, 255, 196, 0.05);
+        background: rgba(0, 255, 65, 0.05);
     }
 
     75% {
@@ -905,8 +905,8 @@ body.dark #moon-icon {
     background: repeating-linear-gradient(0deg,
             transparent 0,
             transparent 2px,
-            rgba(47, 255, 196, 0.06) 3px,
-            rgba(47, 255, 196, 0.06) 4px);
+            rgba(0, 255, 65, 0.06) 3px,
+            rgba(0, 255, 65, 0.06) 4px);
 }
 
 @media (max-width: 980px) {

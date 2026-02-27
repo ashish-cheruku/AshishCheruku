@@ -54,7 +54,7 @@ export default function Terminal() {
     const handleThemeToggle = useCallback(() => {
         const isDark = document.body.classList.toggle('dark');
         localStorage.setItem('darkMode', isDark);
-        networkColorRef.current = isDark ? '18, 255, 170' : '74, 63, 54';
+        networkColorRef.current = isDark ? '0, 255, 65' : '74, 63, 54';
     }, []);
 
     const handleEmailCopy = useCallback(() => {
@@ -714,7 +714,7 @@ export default function Terminal() {
         const storedTheme = localStorage.getItem('darkMode');
         if (storedTheme === 'true' || storedTheme === null) {
             document.body.classList.add('dark');
-            networkColorRef.current = '18, 255, 170';
+            networkColorRef.current = '0, 255, 65';
             if (storedTheme === null) localStorage.setItem('darkMode', 'true');
         } else {
             // User explicitly prefers light mode
