@@ -506,7 +506,10 @@ export default function Terminal() {
 
         // Click terminal to focus input
         function handleTerminalClick(event) {
-            if (event.target.tagName.toLowerCase() !== 'a') inputEl.focus();
+            const target = event.target;
+            if (!(target instanceof Element)) return;
+            if (target.closest('a, button')) return;
+            inputEl.focus();
         }
         terminalRef.current.addEventListener('click', handleTerminalClick);
         terminalRef.current.addEventListener('click', initAudio, { once: true });
