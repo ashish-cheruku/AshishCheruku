@@ -10,7 +10,6 @@ export default function Terminal() {
     const guiModeRef = useRef(null);
     const canvasRef = useRef(null);
     const footerRef = useRef(null);
-    const guiFooterRef = useRef(null);
     const livePromptRef = useRef(null);
     const clockRef = useRef(null);
 
@@ -39,8 +38,8 @@ export default function Terminal() {
         const wrapper = document.createElement('div');
         wrapper.className = 'output-entry';
         if (isCommand) {
-            const promptSpan = `<span class="prompt-live text-lg">${promptText.replace(/ /g, '&nbsp;')}</span>`;
-            const commandSpan = `<span class="command text-lg" style="white-space: pre-wrap; word-break: break-all;">${html}</span>`;
+            const promptSpan = `<span class="prompt-live">${promptText.replace(/ /g, '&nbsp;')}</span>`;
+            const commandSpan = `<span class="command" style="white-space: pre-wrap; word-break: break-all;">${html}</span>`;
             const promptLine = document.createElement('div');
             promptLine.className = 'prompt-line-wrapper';
             promptLine.innerHTML = `${promptSpan}${commandSpan}`;
@@ -55,7 +54,7 @@ export default function Terminal() {
     const handleThemeToggle = useCallback(() => {
         const isDark = document.body.classList.toggle('dark');
         localStorage.setItem('darkMode', isDark);
-        networkColorRef.current = isDark ? '0, 255, 65' : '74, 63, 54';
+        networkColorRef.current = isDark ? '18, 255, 170' : '74, 63, 54';
     }, []);
 
     const handleEmailCopy = useCallback(() => {
@@ -70,6 +69,14 @@ export default function Terminal() {
         if (!guiModeEl) return;
         guiModeEl.innerHTML = '';
 
+        const skillIcons = {
+            Fundamentals: '[]',
+            Programming: '</>',
+            'Web (Backend)': '{ }',
+            'Web (Frontend)': '<UI>',
+            DevOps: '>>'
+        };
+
         const sections = {
             'About': portfolioData.about,
             'Experience': portfolioData.experience,
@@ -78,6 +85,27 @@ export default function Terminal() {
             'Education': portfolioData.education,
             'Hobbies': portfolioData.hobbies,
         };
+
+        const hero = document.createElement('div');
+        hero.className = 'gui-hero';
+        const stats = [
+            { label: 'Projects', value: portfolioData.projects.length },
+            { label: 'Roles', value: portfolioData.experience.length },
+            { label: 'Skill Tracks', value: Object.keys(portfolioData.skills).length },
+        ];
+        hero.innerHTML = `
+            <div class="gui-hero-mark">
+                <span class="gui-hero-monogram">AK</span>
+                <span class="gui-hero-status">Open To Work</span>
+            </div>
+            <div class="gui-hero-copy">
+                <h2>Ashish Kumar Cheruku</h2>
+                <p>AI + DevOps Engineer building high-performance, production-grade systems.</p>
+            </div>
+            <div class="gui-hero-stats">
+                ${stats.map((stat) => `<div class="hero-stat"><strong>${stat.value}</strong><span>${stat.label}</span></div>`).join('')}
+            </div>
+        `;
 
         const nav = document.createElement('div');
         nav.className = 'gui-tabs-nav';
@@ -99,31 +127,39 @@ export default function Terminal() {
 
             let html = '';
             if (sectionTitle === 'About') {
-                html = `<p>${sections[sectionTitle].replace(/\n/g, '<br>')}</p>`;
+                const paragraphs = sections[sectionTitle]
+                    .split('\n\n')
+                    .map((text) => `<p>${text.replace(/\n/g, '<br>')}</p>`)
+                    .join('');
+                html = `<section class="gui-card about-panel">${paragraphs}</section>`;
             } else if (sectionTitle === 'Experience') {
                 sections[sectionTitle].forEach(e => {
-                    html += `<div class="gui-item"><div class="gui-item-title">${e.role}${e.company ? ' @ ' + e.company : ''} (${e.period})</div><ul>`;
+                    html += `<article class="gui-card timeline-card"><div class="gui-item-title">${e.role}${e.company ? ' @ ' + e.company : ''}</div><div class="gui-item-meta">${e.period}</div><ul class="gui-list">`;
                     e.desc.forEach(point => { html += `<li>${point}</li>`; });
-                    html += `</ul></div>`;
+                    html += `</ul></article>`;
                 });
             } else if (sectionTitle === 'Projects') {
-                sections[sectionTitle].forEach(p => {
-                    html += `<div class="gui-item"><div class="gui-item-title">${p.name} (${p.tech})</div><ul>`;
+                sections[sectionTitle].forEach((p, index) => {
+                    html += `<article class="gui-card project-card ${index === 0 ? 'project-featured' : ''}"><div class="gui-item-title">${p.name}</div><div class="gui-item-meta">${p.tech}</div><ul class="gui-list">`;
                     p.desc.forEach(d => { html += `<li>${d}</li>`; });
-                    html += `</ul><a href="${p.url}" target="_blank" class="link">View on GitHub -></a></div>`;
+                    html += `</ul><a href="${p.url}" target="_blank" rel="noopener noreferrer" class="link project-link">View project -></a></article>`;
                 });
             } else if (sectionTitle === 'Skills') {
                 for (const category in sections[sectionTitle]) {
-                    html += `<div class="skills-subcategory-title">${category}</div><div class="skills-grid">`;
+                    html += `<article class="gui-card skills-panel"><div class="skills-subcategory-title"><span class="skill-icon">${skillIcons[category] || '::'}</span>${category}</div><div class="skills-grid">`;
                     sections[sectionTitle][category].forEach(skill => { html += `<div class="skill-box">${skill}</div>`; });
-                    html += '</div>';
+                    html += '</div></article>';
                 }
             } else if (sectionTitle === 'Education') {
                 sections[sectionTitle].forEach(edu => {
-                    html += `<div class="gui-item"><div class="gui-item-title">${edu.school}</div>${edu.degree}<br><i>${edu.details}</i></div>`;
+                    html += `<article class="gui-card edu-card"><div class="gui-item-title">${edu.school}</div><div class="gui-item-meta">${edu.degree}</div><p>${edu.details}</p></article>`;
                 });
             } else if (sectionTitle === 'Hobbies') {
-                html = `<p>${sections[sectionTitle]}</p>`;
+                const hobbyChips = sections[sectionTitle]
+                    .split(',')
+                    .map((hobby) => `<span class="hobby-chip">${hobby.trim()}</span>`)
+                    .join('');
+                html = `<section class="gui-card hobbies-panel"><p>${sections[sectionTitle]}</p><div class="hobbies-grid">${hobbyChips}</div></section>`;
             }
 
             contentPanel.innerHTML = html;
@@ -136,6 +172,7 @@ export default function Terminal() {
             }
         }
 
+        guiModeEl.appendChild(hero);
         guiModeEl.appendChild(nav);
         guiModeEl.appendChild(contentContainer);
 
@@ -175,6 +212,7 @@ export default function Terminal() {
     }, []);
 
     useEffect(() => {
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         // ===================== AUDIO =====================
         function initAudio() {
             if (soundsReadyRef.current) return;
@@ -486,26 +524,29 @@ export default function Terminal() {
             }
 
             overlay.style.display = 'flex';
+            const bootSpeed = prefersReducedMotion ? 0.2 : 0.55;
 
             // --- Create Matrix rain columns ---
             const rainContainer = overlay.querySelector('.matrix-rain');
             const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF';
-            for (let i = 0; i < 30; i++) {
-                const col = document.createElement('div');
-                col.className = 'matrix-column';
-                col.style.left = `${(i / 30) * 100}%`;
-                col.style.animationDuration = `${3 + Math.random() * 5}s`;
-                col.style.animationDelay = `${Math.random() * 3}s`;
-                col.style.fontSize = `${10 + Math.random() * 6}px`;
-                let text = '';
-                for (let j = 0; j < 40; j++) text += chars[Math.floor(Math.random() * chars.length)];
-                col.textContent = text;
-                rainContainer.appendChild(col);
+            if (!prefersReducedMotion) {
+                for (let i = 0; i < 30; i++) {
+                    const col = document.createElement('div');
+                    col.className = 'matrix-column';
+                    col.style.left = `${(i / 30) * 100}%`;
+                    col.style.animationDuration = `${3 + Math.random() * 5}s`;
+                    col.style.animationDelay = `${Math.random() * 3}s`;
+                    col.style.fontSize = `${10 + Math.random() * 6}px`;
+                    let text = '';
+                    for (let j = 0; j < 40; j++) text += chars[Math.floor(Math.random() * chars.length)];
+                    col.textContent = text;
+                    rainContainer.appendChild(col);
+                }
             }
 
             // --- Helpers ---
-            const wait = (ms) => new Promise((r, rej) => {
-                const id = setTimeout(r, ms);
+            const wait = (ms) => new Promise((r) => {
+                setTimeout(r, ms * bootSpeed);
                 // Check cancelled flag after wait resolves
             });
             const checkCancelled = () => { if (cancelled) throw new Error('BOOT_CANCELLED'); };
@@ -516,6 +557,7 @@ export default function Terminal() {
             const glitchEl = overlay.querySelector('.boot-glitch');
 
             function triggerGlitch() {
+                if (prefersReducedMotion) return;
                 glitchEl.classList.remove('active');
                 void glitchEl.offsetWidth; // force reflow
                 glitchEl.classList.add('active');
@@ -666,14 +708,13 @@ export default function Terminal() {
         // ===================== FOOTER =====================
         const copyrightText = `&copy; ${new Date().getFullYear()} Ashish Kumar Cheruku. All rights reserved. | <a href="mailto:achicheruku@gmail.com" class="link">Contact Me</a>`;
         if (footerRef.current) footerRef.current.innerHTML = copyrightText;
-        if (guiFooterRef.current) guiFooterRef.current.innerHTML = copyrightText;
 
         // ===================== DARK MODE (initial load) =====================
         // Default to dark mode. If no preference (null), set it to true.
         const storedTheme = localStorage.getItem('darkMode');
         if (storedTheme === 'true' || storedTheme === null) {
             document.body.classList.add('dark');
-            networkColorRef.current = '0, 255, 65';
+            networkColorRef.current = '18, 255, 170';
             if (storedTheme === null) localStorage.setItem('darkMode', 'true');
         } else {
             // User explicitly prefers light mode
@@ -691,7 +732,8 @@ export default function Terminal() {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        const nodeCount = Math.floor((window.innerWidth * window.innerHeight) / 25000);
+        const densityDivisor = window.innerWidth <= 768 ? 40000 : 28000;
+        const nodeCount = Math.max(18, Math.floor((window.innerWidth * window.innerHeight) / densityDivisor));
 
         function setupNetwork() {
             nodesRef.current = [];
@@ -750,7 +792,11 @@ export default function Terminal() {
 
         resizeCanvas();
         setupNetwork();
-        animate();
+        if (prefersReducedMotion) {
+            drawNetwork();
+        } else {
+            animate();
+        }
 
 
 
@@ -794,9 +840,16 @@ export default function Terminal() {
             <div className="terminal-container">
                 <div id="contact-icons-wrapper" style={{ opacity: bootComplete ? 1 : 0, transition: 'opacity 0.5s ease-in', pointerEvents: bootComplete ? 'auto' : 'none' }}>
                     <div id="contact-icons-container">
+                        <div className="brand-group">
+                            <div className="brand-mark">AK</div>
+                            <div className="brand-copy">
+                                <span className="brand-title">Ashish Kumar Cheruku</span>
+                                <span className="brand-subtitle">{isGuiMode ? 'Profile Mode' : 'Terminal Mode'}</span>
+                            </div>
+                        </div>
                         <div id="contact-icons">
                             {/* Theme Toggle */}
-                            <div id="theme-toggle-button" className="icon-button" title="Toggle Dark Mode" style={{ cursor: 'pointer' }} onClick={handleThemeToggle}>
+                            <button type="button" id="theme-toggle-button" className="icon-button control-pill" title="Toggle Dark Mode" onClick={handleThemeToggle}>
                                 <svg id="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <circle cx="12" cy="12" r="5"></circle>
                                     <line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>
@@ -807,29 +860,29 @@ export default function Terminal() {
                                 <svg id="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                                 </svg>
-                            </div>
+                            </button>
                             {/* Email Copy */}
-                            <div id="email-copy-button" className="icon-button" title="Copy Email" style={{ cursor: 'pointer' }} onClick={handleEmailCopy}>
+                            <button type="button" id="email-copy-button" className="icon-button control-pill" title="Copy Email" onClick={handleEmailCopy}>
                                 <svg viewBox="0 0 24 24"><path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z" /></svg>
-                            </div>
+                            </button>
                             {/* LinkedIn */}
-                            <a href="https://www.linkedin.com/in/ashish-k-cheruku/" target="_blank" title="LinkedIn">
+                            <a href="https://www.linkedin.com/in/ashish-k-cheruku/" target="_blank" rel="noopener noreferrer" className="icon-button control-pill" title="LinkedIn">
                                 <svg viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
                             </a>
                             {/* GitHub */}
-                            <a href="https://github.com/ashish-cheruku" target="_blank" title="GitHub">
+                            <a href="https://github.com/ashish-cheruku" target="_blank" rel="noopener noreferrer" className="icon-button control-pill" title="GitHub">
                                 <svg viewBox="0 0 25 25"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.95 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.85-2.34 4.7-4.57 4.94.36.31.68.92.68 1.85v2.72c0 .27.18.58.69.48A10 10 0 0 0 22 12 10 10 0 0 0 12 2Z" /></svg>
                             </a>
                             {/* X / Twitter */}
-                            <a href="https://x.com/Ashish_Cheruku" target="_blank" title="X / Twitter">
+                            <a href="https://x.com/Ashish_Cheruku" target="_blank" rel="noopener noreferrer" className="icon-button control-pill" title="X / Twitter">
                                 <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
                             </a>
                             {/* Resume */}
-                            <a href="/CV_Ashish.pdf" target="_blank" title="Download Resume">
+                            <a href="/CV_Ashish.pdf" target="_blank" className="icon-button control-pill" title="Download Resume">
                                 <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"></path></svg>
                             </a>
                             {/* GUI Toggle */}
-                            <div id="gui-toggle-button" className="icon-button" title={isGuiMode ? "Switch to Terminal View" : "Switch to Standard View"} onClick={handleGuiToggle} style={{ cursor: 'pointer' }}>
+                            <button type="button" id="gui-toggle-button" className="icon-button control-pill" title={isGuiMode ? 'Switch to Terminal View' : 'Switch to Standard View'} onClick={handleGuiToggle}>
                                 <svg id="gui-icon-standard" className="icon-button" viewBox="0 0 240 330" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" style={{ display: isGuiMode ? 'none' : 'block' }}>
                                     <g stroke="currentColor" strokeWidth="20" fill="none" strokeLinecap="round" strokeLinejoin="round">
                                         <rect x="12" y="12" width="216" height="306" rx="20" ry="20" />
@@ -843,26 +896,26 @@ export default function Terminal() {
                                     <polyline points="4 17 10 11 4 5"></polyline>
                                     <line x1="12" y1="19" x2="20" y2="19"></line>
                                 </svg>
-                            </div>
+                            </button>
                         </div>
 
-                        <div id="status-bar" style={{ display: 'flex', alignItems: 'center', gap: '1rem', pointerEvents: bootComplete ? 'auto' : 'none', paddingRight: '1rem', visibility: isGuiMode ? 'hidden' : 'visible', opacity: bootComplete ? 1 : 0, transition: 'opacity 0.5s ease-in' }}>
-
+                        <div id="status-bar" style={{ pointerEvents: bootComplete ? 'auto' : 'none', visibility: isGuiMode ? 'hidden' : 'visible', opacity: bootComplete ? 1 : 0, transition: 'opacity 0.5s ease-in' }}>
+                            <span className="status-pill">LIVE</span>
                             <span id="clock" ref={clockRef}>--:--:--</span>
                         </div>
                     </div>
                 </div>
 
-                <div id="terminal" ref={terminalRef} className="w-full rounded-lg shadow-2xl p-4" style={{ display: isGuiMode ? 'none' : 'flex', flexDirection: 'column', opacity: bootComplete ? 1 : 0, transition: 'opacity 0.5s ease-in' }}>
+                <div id="terminal" ref={terminalRef} className="main-panel" style={{ display: isGuiMode ? 'none' : 'flex', opacity: bootComplete ? 1 : 0, transition: 'opacity 0.5s ease-in' }}>
                     <div id="output" ref={outputRef} style={{ flexGrow: 1 }}></div>
-                    <div id="input-line" className="prompt-line-wrapper" style={{ flexShrink: 0, marginTop: '1rem', display: 'flex' }}>
-                        <span className="prompt-live text-lg" ref={livePromptRef}></span>
-                        <div id="terminal-input" ref={inputRef} className="text-lg" contentEditable="true" spellCheck="false" suppressContentEditableWarning={true}></div>
+                    <div id="input-line" className="prompt-line-wrapper">
+                        <span className="prompt-live" ref={livePromptRef}></span>
+                        <div id="terminal-input" ref={inputRef} contentEditable="true" spellCheck="false" suppressContentEditableWarning={true}></div>
                     </div>
                     <div id="footer" ref={footerRef}></div>
                 </div>
 
-                <div id="gui-mode" ref={guiModeRef} className="w-full rounded-lg shadow-2xl p-8 overflow-y-auto" style={{ display: isGuiMode ? 'block' : 'none' }}>
+                <div id="gui-mode" ref={guiModeRef} className="main-panel" style={{ display: isGuiMode ? 'block' : 'none' }}>
                 </div>
             </div>
         </>
