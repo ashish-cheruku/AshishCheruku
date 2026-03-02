@@ -25,6 +25,11 @@ export default function Terminal() {
     const nodesRef = useRef([]);
     const mouseRef = useRef({ x: undefined, y: undefined });
     const hasBootedRef = useRef(false);
+    const cursorRef = useRef(null);
+    const konamiRef = useRef([]);
+    const cwdRef = useRef('~');
+    const completionDropdownRef = useRef(null);
+    const isPartyModeRef = useRef(false);
 
     // GUI Mode State
     const [isGuiMode, setIsGuiMode] = useState(false);
@@ -99,7 +104,7 @@ export default function Terminal() {
                 <span class="gui-hero-status">Open To Work</span>
             </div>
             <div class="gui-hero-copy">
-                <h2>Ashish Kumar Cheruku</h2>
+                <h2 class="glitch-hover">Ashish Kumar Cheruku</h2>
                 <p>AI + DevOps Engineer building high-performance, production-grade systems.</p>
             </div>
             <div class="gui-hero-stats">
@@ -133,21 +138,39 @@ export default function Terminal() {
                     .join('');
                 html = `<section class="gui-card about-panel">${paragraphs}</section>`;
             } else if (sectionTitle === 'Experience') {
+                html = `<div class="timeline">`;
                 sections[sectionTitle].forEach(e => {
-                    html += `<article class="gui-card timeline-card"><div class="gui-item-title">${e.role}${e.company ? ' @ ' + e.company : ''}</div><div class="gui-item-meta">${e.period}</div><ul class="gui-list">`;
+                    html += `<div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content gui-card timeline-card">
+                            <div class="gui-item-title glitch-hover">${e.role}${e.company ? ' @ ' + e.company : ''}</div>
+                            <div class="gui-item-meta">${e.period}</div>
+                            <ul class="gui-list">`;
                     e.desc.forEach(point => { html += `<li>${point}</li>`; });
-                    html += `</ul></article>`;
+                    html += `</ul></div></div>`;
                 });
+                html += `</div>`;
             } else if (sectionTitle === 'Projects') {
                 sections[sectionTitle].forEach((p, index) => {
-                    html += `<article class="gui-card project-card ${index === 0 ? 'project-featured' : ''}"><div class="gui-item-title">${p.name}</div><div class="gui-item-meta">${p.tech}</div><ul class="gui-list">`;
+                    html += `<article class="gui-card project-card ${index === 0 ? 'project-featured' : ''}"><div class="gui-item-title glitch-hover">${p.name}</div><div class="gui-item-meta">${p.tech}</div><ul class="gui-list">`;
                     p.desc.forEach(d => { html += `<li>${d}</li>`; });
                     html += `</ul><a href="${p.url}" target="_blank" rel="noopener noreferrer" class="link project-link">View project -></a></article>`;
                 });
             } else if (sectionTitle === 'Skills') {
+                const skillLevels = {
+                    'Python': 90, 'C/C++': 75, 'Javascript/Typescript': 85,
+                    'Next.js': 88, 'React.js': 85, 'Node.js': 80, 'Express.js': 78,
+                    'Django': 70, 'FastAPI': 72, 'HTML': 90, 'CSS': 82, 'Tailwind': 80,
+                    'Docker': 82, 'Kubernetes': 78, 'Git & GitHub': 92, 'Nginx': 75,
+                    'Keycloak': 70, 'Terraform': 65, 'Jenkins': 68, 'CI/CD': 80,
+                    'DSA': 78, 'Operating Systems': 72, 'DBMS': 75,
+                };
                 for (const category in sections[sectionTitle]) {
                     html += `<article class="gui-card skills-panel"><div class="skills-subcategory-title"><span class="skill-icon">${skillIcons[category] || '::'}</span>${category}</div><div class="skills-grid">`;
-                    sections[sectionTitle][category].forEach(skill => { html += `<div class="skill-box">${skill}</div>`; });
+                    sections[sectionTitle][category].forEach(skill => {
+                        const level = skillLevels[skill] || 70;
+                        html += `<div class="skill-box-wrap" title="${skill}: ${level}%">${skill}<div class="skill-bar-track"><div class="skill-bar-fill" style="--target-width:${level}%"></div></div></div>`;
+                    });
                     html += '</div></article>';
                 }
             } else if (sectionTitle === 'Education') {
@@ -180,6 +203,38 @@ export default function Terminal() {
         footerClone.id = 'gui-footer';
         footerClone.innerHTML = `&copy; ${new Date().getFullYear()} Ashish Kumar Cheruku. All rights reserved. | <a href="mailto:achicheruku@gmail.com" class="link">Contact Me</a>`;
         guiModeEl.appendChild(footerClone);
+
+        // Skill bar + timeline IntersectionObserver
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate');
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        guiModeEl.querySelectorAll('.skill-bar-fill').forEach(el => observer.observe(el));
+        guiModeEl.querySelectorAll('.timeline-item').forEach((el, i) => {
+            el.style.transitionDelay = `${i * 0.1}s`;
+            observer.observe(el);
+        });
+
+        // 3D tilt on project cards
+        guiModeEl.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const rx = ((e.clientY - cy) / (rect.height / 2)) * 6;
+                const ry = -((e.clientX - cx) / (rect.width / 2)) * 6;
+                card.style.transform = `perspective(600px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.02)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = '';
+            });
+        });
     }, []);
 
     const handleGuiToggle = useCallback(() => {
@@ -235,6 +290,24 @@ export default function Terminal() {
             osc.start(ctx.currentTime); osc.stop(ctx.currentTime + duration);
         }
 
+        // ===================== PARTICLES =====================
+        function createParticles(x, y, count = 20) {
+            const container = document.getElementById('particles-container');
+            if (!container) return;
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 30 + Math.random() * 80;
+                p.style.setProperty('--dx', Math.cos(angle) * dist);
+                p.style.setProperty('--dy', Math.sin(angle) * dist);
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                container.appendChild(p);
+                p.addEventListener('animationend', () => p.remove(), { once: true });
+            }
+        }
+
         function playTypingSound() {
             if (!soundsReadyRef.current) return;
             const ctx = audioCtxRef.current;
@@ -250,8 +323,17 @@ export default function Terminal() {
 
         // ===================== COMMANDS =====================
         function showHelp() {
-            let helpText = `Available commands:<br>  <span class="command">about</span>, <span class="command">education</span>, <span class="command">experience</span>, <span class="command">projects</span>, <span class="command">skills</span>, <span class="command">hobbies</span>, <span class="command">resume</span>, <span class="command">contact</span>, <span class="command">creator</span>, <span class="command">all</span>, <span class="command">clear</span>`;
-            helpText += `<br><br>You can also ask me a question, like: <i>"What are his most recent projects?"</i>`;
+            const cmds = [
+                ['about', 'education', 'experience', 'projects', 'skills', 'hobbies'],
+                ['resume', 'contact', 'creator', 'all', 'clear', 'history'],
+                ['neofetch', 'whois', 'ping', 'ls', 'cd', 'cat', 'pwd'],
+                ['hack', 'matrix', 'party', 'coffee', 'sudo', 'exit'],
+            ];
+            let helpText = `Available commands:<br>`;
+            cmds.forEach(row => {
+                helpText += '  ' + row.map(c => `<span class="command">${c}</span>`).join(', ') + '<br>';
+            });
+            helpText += `<br>Try the <span class="command">Konami code</span> for a surprise. Or just ask me anything in plain English.`;
             appendOutput(helpText);
         }
         function showAbout() { appendOutput(`<div class="skills-category-title">About Me</div>${portfolioData.about}`); }
@@ -331,11 +413,252 @@ export default function Terminal() {
             appendOutput(`Welcome to <span class="command">Ashish Kumar Cheruku</span>'s interactive portfolio.\nType <span class="command">'help'</span> for a list of commands, or ask me a question in plain English.`);
         }
 
+        // ===================== VIRTUAL FILE SYSTEM =====================
+        const virtualFS = {
+            '~': {
+                'about.txt': portfolioData.about,
+                'contact.txt': `Email: achicheruku@gmail.com\nLinkedIn: ${portfolioData.contact.linkedin}\nGitHub: ${portfolioData.contact.github}`,
+                projects: {
+                    'lms-erp': {
+                        'README.md': 'Full-stack LMS/ERP for a Government College. Built with Next.js, PostgreSQL, Prisma.',
+                        'stack.txt': 'Next.js · PostgreSQL · Prisma · NextAuth · Vercel',
+                    },
+                    portfolio: { 'README.md': 'This website. Terminal-style portfolio with AI chat.' },
+                },
+                experience: {
+                    'smarttrak.txt': 'DevOps Engineer Intern @ SmartTrak AI (Jan–Apr 2025). Keycloak OIDC, Kubernetes RBAC, Nginx.',
+                    'freelance.txt': 'Freelance SWE (Aug–Nov 2025). Agent systems, Go backend, LangGraph Text-to-SQL.',
+                },
+            }
+        };
+
+        function fsResolve(path) {
+            if (path === '~' || path === '/') return virtualFS['~'];
+            const parts = path.replace(/^~\//, '').split('/').filter(Boolean);
+            let node = virtualFS['~'];
+            for (const p of parts) {
+                if (!node || typeof node !== 'object' || node[p] === undefined) return null;
+                node = node[p];
+            }
+            return node;
+        }
+
+        function cwdJoin(rel) {
+            if (rel === '..') {
+                const parts = cwdRef.current.split('/').filter(Boolean);
+                if (parts.length <= 1) return '~';
+                parts.pop();
+                return parts.join('/');
+            }
+            return cwdRef.current === '~' ? `~/${rel}` : `${cwdRef.current}/${rel}`;
+        }
+
+        function cmdLs(args) {
+            const target = args[0] ? cwdJoin(args[0]) : cwdRef.current;
+            const node = fsResolve(target);
+            if (!node) return appendOutput(`<span class="error">ls: ${args[0]}: No such file or directory</span>`);
+            if (typeof node === 'string') return appendOutput(node);
+            const entries = Object.keys(node).map(name =>
+                typeof node[name] === 'object'
+                    ? `<span class="command">${name}/</span>`
+                    : `<span style="color:var(--text)">${name}</span>`
+            ).join('  ');
+            appendOutput(entries || '(empty)');
+        }
+
+        function cmdCd(args) {
+            if (!args[0] || args[0] === '~') { cwdRef.current = '~'; updatePrompt(); return; }
+            const target = cwdJoin(args[0]);
+            const node = fsResolve(target);
+            if (!node) return appendOutput(`<span class="error">cd: ${args[0]}: No such directory</span>`);
+            if (typeof node === 'string') return appendOutput(`<span class="error">cd: ${args[0]}: Not a directory</span>`);
+            cwdRef.current = target;
+            updatePrompt();
+        }
+
+        function cmdCat(args) {
+            if (!args[0]) return appendOutput('<span class="error">cat: missing file operand</span>');
+            const target = cwdJoin(args[0]);
+            const node = fsResolve(target);
+            if (!node) return appendOutput(`<span class="error">cat: ${args[0]}: No such file</span>`);
+            if (typeof node === 'object') return appendOutput(`<span class="error">cat: ${args[0]}: Is a directory</span>`);
+            appendOutput(node.replace(/\n/g, '<br>'));
+        }
+
+        function cmdPwd() { appendOutput(cwdRef.current); }
+
+        function updatePrompt() {
+            const display = cwdRef.current === '~' ? '~' : cwdRef.current;
+            if (livePromptRef.current) {
+                livePromptRef.current.innerHTML = `Ashish@linux&nbsp;${display}&nbsp;%&nbsp;`;
+            }
+        }
+
+        // ===================== EXTRA COMMANDS =====================
+        function showNeofetch() {
+            const art = `<span class="command">      .-.      </span>
+<span class="command">     (o o)     </span>
+<span class="command">    | O O |    </span>
+<span class="command">     '---'     </span>`;
+            appendOutput(`<div style="display:flex;gap:24px;font-family:var(--font-mono);font-size:0.85rem;line-height:1.7">
+<div>${art}</div>
+<div>
+<span class="command">ashish@portfolio</span><br>
+<span style="color:var(--border)">────────────────</span><br>
+<span class="command">OS:</span>       Ashish OS 23.0 LTS<br>
+<span class="command">Host:</span>     Earth, India<br>
+<span class="command">Shell:</span>    ambition 5.0<br>
+<span class="command">Uptime:</span>   23 years, 4 months<br>
+<span class="command">Packages:</span> 47 skills installed<br>
+<span class="command">CPU:</span>      Brain @ 3.6GHz (overclocked)<br>
+<span class="command">Memory:</span>   ∞ curiosity / 8GB RAM<br>
+<span class="command">Terminal:</span> this one<br>
+<span class="command">Theme:</span>    Hacker Green<br>
+</div></div>`);
+        }
+
+        function showWhois() {
+            appendOutput(`<pre style="font-family:var(--font-mono);font-size:0.85rem;line-height:1.7">% WHOIS ashish-cheruku
+<span style="color:var(--border)">──────────────────────────────</span>
+<span class="command">Domain:</span>     ashish-cheruku
+<span class="command">Registered:</span> 2001-07-15
+<span class="command">Status:</span>     ACTIVE
+<span class="command">Nameserver:</span> bits-pilani.ac.in
+<span class="command">Interests:</span>  AI, DevOps, Football, 3D Printing
+<span class="command">Email:</span>      achicheruku@gmail.com</pre>`);
+        }
+
+        function showPing() {
+            const lines = [
+                `PING ashish.dev (127.0.0.1): 56 bytes`,
+                `64 bytes from ashish.dev: icmp_seq=0 ttl=64 time=${(0.3 + Math.random() * 0.3).toFixed(2)} ms`,
+                `64 bytes from ashish.dev: icmp_seq=1 ttl=64 time=${(0.3 + Math.random() * 0.2).toFixed(2)} ms`,
+                `64 bytes from ashish.dev: icmp_seq=2 ttl=64 time=${(0.3 + Math.random() * 0.15).toFixed(2)} ms`,
+                `<span class="command">--- ashish.dev ping statistics ---</span> 3 packets transmitted, 3 received, 0% packet loss`,
+            ];
+            lines.forEach((line, i) => {
+                setTimeout(() => appendOutput(`<span style="font-family:var(--font-mono);font-size:0.85rem">${line}</span>`), i * 400);
+            });
+        }
+
+        function showHistory() {
+            if (commandHistoryRef.current.length === 0) return appendOutput('No command history yet.');
+            const html = commandHistoryRef.current.slice().reverse()
+                .map((cmd, i) => `<span style="color:var(--muted);font-family:var(--font-mono)">${String(i + 1).padStart(3, ' ')}  ${cmd}</span>`)
+                .join('<br>');
+            appendOutput(html);
+        }
+
+        function triggerParty() {
+            isPartyModeRef.current = !isPartyModeRef.current;
+            const term = terminalRef.current;
+            if (term) term.classList.toggle('party-mode', isPartyModeRef.current);
+            appendOutput(isPartyModeRef.current
+                ? '🎉 PARTY MODE ON — type <span class="command">party</span> again to stop'
+                : '🎉 Party mode off. Back to hacking.');
+            if (isPartyModeRef.current) {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        createParticles(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 15);
+                    }, i * 200);
+                }
+            }
+        }
+
+        function triggerHack() {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'output-entry';
+            outputRef.current.appendChild(wrapper);
+            const ips = Array.from({ length: 8 }, () =>
+                Array.from({ length: 4 }, () => Math.floor(Math.random() * 256)).join('.')
+            );
+            ips.forEach((ip, i) => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'hack-line';
+                    line.style.animationDelay = i * 0.05 + 's';
+                    line.innerHTML = `<span style="font-family:var(--font-mono);font-size:0.82rem;color:var(--text)">Scanning ${ip}... <span style="color:var(--accent-2)">OPEN</span></span>`;
+                    wrapper.appendChild(line);
+                    window.scrollTo(0, document.body.scrollHeight);
+                }, i * 120);
+            });
+            setTimeout(() => {
+                appendOutput(`<span class="error" style="font-family:var(--font-mono)">ACCESS DENIED: target hardened. Nice try.</span>`);
+            }, ips.length * 120 + 200);
+        }
+
+        function triggerMatrix() {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:9990;pointer-events:none;overflow:hidden;opacity:0;transition:opacity 0.3s';
+            const chars = 'アイウエオ0123456789ABCDEF';
+            for (let i = 0; i < 20; i++) {
+                const col = document.createElement('div');
+                col.className = 'matrix-column';
+                col.style.left = `${(i / 20) * 100}%`;
+                col.style.animationDuration = `${2 + Math.random() * 3}s`;
+                let text = '';
+                for (let j = 0; j < 30; j++) text += chars[Math.floor(Math.random() * chars.length)];
+                col.textContent = text;
+                overlay.appendChild(col);
+            }
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+            appendOutput('<span style="color:#00ff41;font-family:var(--font-mono)">Wake up, Neo...</span>');
+            setTimeout(() => { overlay.style.opacity = '0'; setTimeout(() => overlay.remove(), 400); }, 4000);
+        }
+
+        function triggerRmRf() {
+            appendOutput('<span style="font-family:var(--font-mono)">Deleting everything</span>');
+            let dots = 0;
+            const iv = setInterval(() => {
+                dots++;
+                if (outputRef.current?.lastChild) {
+                    outputRef.current.lastChild.innerHTML = `<span style="font-family:var(--font-mono)">Deleting everything${'.'.repeat(dots)}</span>`;
+                }
+                if (dots >= 5) {
+                    clearInterval(iv);
+                    appendOutput('<span style="color:var(--accent);font-family:var(--font-mono)">Just kidding. I like my files.</span>');
+                }
+            }, 400);
+        }
+
+        function showCoffee() {
+            appendOutput(`<pre style="font-family:var(--font-mono);color:var(--accent);line-height:1.4">    ( (
+     ) )
+  ........
+  |      |]
+  \\      /
+   \`----'
+Fuel: 3 cups/day</pre>`);
+        }
+
         const commands = {
             'help': showHelp, 'about': showAbout, 'education': showEducation,
             'experience': showExperience, 'projects': showProjects, 'skills': showSkills,
             'hobbies': showHobbies, 'resume': showResume, 'contact': showContact,
-            'clear': clearTerminal, 'all': showAllInfo, 'creator': showCreator
+            'clear': clearTerminal, 'all': showAllInfo, 'creator': showCreator,
+            // New commands
+            'neofetch': showNeofetch,
+            'whois ashish': showWhois,
+            'whois': showWhois,
+            'ping ashish': showPing,
+            'ping ashish.dev': showPing,
+            'ping': showPing,
+            'history': showHistory,
+            'party': triggerParty,
+            'hack': triggerHack,
+            'matrix': triggerMatrix,
+            'exit': () => appendOutput('"You can check out any time you like, but you can never leave."'),
+            'sudo': () => appendOutput('<span class="error">Nice try. You are not root. This incident will be reported.</span>'),
+            'sudo su': () => appendOutput('<span class="error">Nice try. You are not root. This incident will be reported.</span>'),
+            'rm -rf /': triggerRmRf,
+            'rm -rf': triggerRmRf,
+            'coffee': showCoffee,
+            'ls': (args) => cmdLs(args || []),
+            'ls -la': (args) => cmdLs([]),
+            'pwd': cmdPwd,
+            'cd': (args) => cmdCd(args || []),
+            'cat': (args) => cmdCat(args || []),
         };
 
         // ===================== AI CHAT =====================
@@ -357,8 +680,8 @@ export default function Terminal() {
 
         async function getAIResponse(userInput) {
             const thinkingMessage = document.createElement('div');
-            thinkingMessage.className = 'output-entry';
-            thinkingMessage.textContent = 'Thinking...';
+            thinkingMessage.className = 'output-entry ai-thinking';
+            thinkingMessage.textContent = '⬡ thinking';
             outputRef.current.appendChild(thinkingMessage);
             window.scrollTo(0, document.body.scrollHeight);
 
@@ -443,24 +766,77 @@ export default function Terminal() {
             sel.addRange(range);
         }
 
+        // ===================== COMPLETION DROPDOWN =====================
+        function updateDropdown() {
+            const existing = document.getElementById('completion-dropdown');
+            if (existing) existing.remove();
+            const val = inputEl.textContent.trim();
+            if (!val) return;
+            const allCmds = Object.keys(commands).filter(c => !c.includes(' '));
+            const matches = allCmds.filter(c => c.startsWith(val) && c !== val).slice(0, 5);
+            if (!matches.length) return;
+            const dd = document.createElement('div');
+            dd.id = 'completion-dropdown';
+            dd.className = 'completion-dropdown';
+            matches.forEach((m, i) => {
+                const item = document.createElement('div');
+                item.className = 'completion-item' + (i === 0 ? ' active' : '');
+                item.textContent = m;
+                item.addEventListener('mousedown', (ev) => {
+                    ev.preventDefault();
+                    inputEl.textContent = m;
+                    moveCursorToEnd(inputEl);
+                    dd.remove();
+                });
+                dd.appendChild(item);
+            });
+            const inputLine = document.getElementById('input-line');
+            if (inputLine) inputLine.style.position = 'relative';
+            inputLine?.appendChild(dd);
+            completionDropdownRef.current = dd;
+        }
+
+        function hideDropdown() {
+            const dd = document.getElementById('completion-dropdown');
+            if (dd) dd.remove();
+        }
+
         function handleKeyDown(e) {
             if (!soundsReadyRef.current) initAudio();
             if (e.key === 'Tab') {
                 e.preventDefault();
+                playSound(600, 'sine', 0.02, 0.06);
                 const currentInput = inputEl.textContent.trim();
-                const potentialCommands = Object.keys(commands).filter(cmd => cmd.startsWith(currentInput));
+                const allCmds = Object.keys(commands).filter(c => !c.includes(' '));
+                const potentialCommands = allCmds.filter(cmd => cmd.startsWith(currentInput));
                 if (potentialCommands.length > 0) {
                     inputEl.textContent = potentialCommands[0];
                     moveCursorToEnd(inputEl);
+                    hideDropdown();
                 }
+            } else if (e.key === 'Escape') {
+                hideDropdown();
             } else if (e.key === 'Enter' && !e.shiftKey) {
+                hideDropdown();
                 e.preventDefault();
-                playSound(440, 'square', 0.08, 0.2);
+                playSound(200, 'triangle', 0.05, 0.12);
+                // Particle burst at input position
+                const rect = inputEl.getBoundingClientRect();
+                createParticles(rect.left, rect.top + rect.height / 2, 18);
                 const userInput = inputEl.innerText.trim();
                 if (!userInput) return;
                 appendOutput(userInput, true);
-                if (commands[userInput.toLowerCase()]) {
-                    commands[userInput.toLowerCase()]();
+                const lower = userInput.toLowerCase().trim();
+                const [cmd, ...args] = lower.split(/\s+/);
+                // Try exact match first (e.g. "sudo su", "rm -rf /")
+                if (commands[lower]) {
+                    typeof commands[lower] === 'function' && commands[lower].length > 0
+                        ? commands[lower](args)
+                        : commands[lower]();
+                } else if (commands[cmd]) {
+                    typeof commands[cmd] === 'function' && commands[cmd].length > 0
+                        ? commands[cmd](args)
+                        : commands[cmd]();
                 } else {
                     getAIResponse(userInput);
                 }
@@ -484,12 +860,35 @@ export default function Terminal() {
                     historyIndexRef.current = -1;
                     inputEl.textContent = '';
                 }
+            } else if (e.key === 'Tab') {
+                // handled above
             } else {
-                playSound(880, 'sine', 0.08, 0.2);
+                playSound(800, 'square', 0.03, 0.08);
+                // Update dropdown after keypress settles
+                setTimeout(updateDropdown, 0);
             }
         }
 
         inputEl.addEventListener('keydown', handleKeyDown);
+
+        // ===================== KONAMI CODE =====================
+        const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+        function handleKonami(e) {
+            konamiRef.current.push(e.key);
+            if (konamiRef.current.length > KONAMI.length) konamiRef.current.shift();
+            if (konamiRef.current.join(',') === KONAMI.join(',')) {
+                konamiRef.current = [];
+                const ov = document.createElement('div');
+                ov.className = 'konami-overlay';
+                ov.innerHTML = '<div class="konami-text">⚡ CHEAT CODE ACTIVATED ⚡</div>';
+                document.body.appendChild(ov);
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => createParticles(Math.random() * window.innerWidth, Math.random() * window.innerHeight, 25), i * 150);
+                }
+                setTimeout(() => ov.remove(), 3000);
+            }
+        }
+        window.addEventListener('keydown', handleKonami);
 
         // Global key handler: focus input on any keydown
         function handleGlobalKeyDown(e) {
@@ -527,6 +926,32 @@ export default function Terminal() {
             }
 
             overlay.style.display = 'flex';
+
+            // Boot skip hint + listener
+            const skipHint = document.createElement('div');
+            skipHint.className = 'boot-skip-hint';
+            skipHint.textContent = '[ Press any key to skip ]';
+            overlay.appendChild(skipHint);
+
+            function finishBoot() {
+                cancelled = true;
+                skipHint.remove();
+                overlay.style.transition = 'opacity 0.3s ease-out';
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.style.opacity = '';
+                    appendOutput(`Welcome to <span class="command">Ashish Kumar Cheruku</span>'s interactive portfolio.\nType <span class="command">'help'</span> for a list of commands, or ask me a question in plain English.`);
+                    setBootComplete(true);
+                    inputEl.focus();
+                }, 320);
+            }
+            function skipHandler(e) {
+                window.removeEventListener('keydown', skipHandler);
+                finishBoot();
+            }
+            window.addEventListener('keydown', skipHandler);
+
             const bootSpeed = prefersReducedMotion ? 0.2 : 0.55;
 
             // --- Create Matrix rain columns ---
@@ -691,6 +1116,8 @@ export default function Terminal() {
                 overlay.classList.remove('fade-out');
 
                 // Now show the terminal welcome
+                window.removeEventListener('keydown', skipHandler);
+                skipHint.remove();
                 appendOutput(`Welcome to <span class="command">Ashish Kumar Cheruku</span>'s interactive portfolio.\nType <span class="command">'help'</span> for a list of commands, or ask me a question in plain English.`);
                 setBootComplete(true);
                 inputEl.focus();
@@ -815,6 +1242,7 @@ export default function Terminal() {
             cancelAnimationFrame(animId);
             inputEl.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keydown', handleGlobalKeyDown);
+            window.removeEventListener('keydown', handleKonami);
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('resize', handleResize);
             if (outputRef.current) outputRef.current.innerHTML = '';
@@ -823,8 +1251,38 @@ export default function Terminal() {
         };
     }, [appendOutput]);
 
+    // ===================== CUSTOM CURSOR =====================
+    useEffect(() => {
+        const cursor = document.createElement('div');
+        cursor.className = 'custom-cursor';
+        cursor.innerHTML = '<div class="cursor-dot"></div>';
+        document.body.appendChild(cursor);
+        cursorRef.current = cursor;
+
+        const onMove = (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        };
+        const onOver = (e) => {
+            if (e.target.closest('a, button, [contenteditable]')) {
+                cursor.classList.add('hovering');
+            } else {
+                cursor.classList.remove('hovering');
+            }
+        };
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseover', onOver);
+        return () => {
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseover', onOver);
+            cursor.remove();
+        };
+    }, []);
+
     return (
         <>
+            {/* Particles Container */}
+            <div id="particles-container"></div>
             {/* Boot Overlay */}
             <div id="boot-overlay" ref={bootOverlayRef} style={{ display: 'none' }}>
                 <div className="matrix-rain"></div>
@@ -846,7 +1304,7 @@ export default function Terminal() {
                         <div className="brand-group">
                             <div className="brand-mark">AK</div>
                             <div className="brand-copy">
-                                <span className="brand-title">Ashish Kumar Cheruku</span>
+                                <span className="brand-title glitch-hover">Ashish Kumar Cheruku</span>
                                 <span className="brand-subtitle">{isGuiMode ? 'Profile Mode' : 'Terminal Mode'}</span>
                             </div>
                         </div>
